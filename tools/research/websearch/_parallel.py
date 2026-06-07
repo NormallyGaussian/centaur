@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import sys
 import time
 import uuid
 from typing import Any
@@ -35,6 +36,10 @@ MCP_URL = "https://search.parallel.ai/mcp"
 MCP_PROTOCOL_VERSION = "2025-06-18"
 MCP_CLIENT_NAME = "centaur-websearch"
 MCP_CLIENT_VERSION = "0.2.0"
+# Identify free-tier traffic at the HTTP layer. Without this, httpx sends a
+# generic `python-httpx/<ver>` User-Agent and centaur usage is only visible via
+# the JSON-RPC `clientInfo` payload.
+MCP_USER_AGENT = f"{MCP_CLIENT_NAME}/{MCP_CLIENT_VERSION} ({sys.platform})"
 SNIPPET_CHAR_LIMIT = 7000
 
 # Per Parallel docs, Deep Research is "optimized within the `pro` and `ultra`
@@ -553,6 +558,7 @@ class ParallelBackend:
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json, text/event-stream",
+            "User-Agent": MCP_USER_AGENT,
         }
         if session_id:
             headers["Mcp-Session-Id"] = session_id
